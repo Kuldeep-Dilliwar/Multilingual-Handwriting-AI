@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pro Handwriting AI - Fixed Suggestions</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <style>
+        :root {
+            --primary: #6750A4;
+            --on-primary: #FFFFFF;
+            --primary-container: #EADDFF;
+            --on-primary-container: #21005D;
+            --surface: #FFFBFE;
+            --surface-container: #F3EDF7;
+            --surface-container-high: #ECE6F0;
+            --outline: #79747E;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--surface);
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            color: #1C1B1F;
+            display: flex;
+        }
+
+        /* --- Layout --- */
+        
+        /* Left: Canvas */
+        .ink-section {
+            flex: 1; 
+            min-width: 0;
+            position: relative;
+            background-color: #fff;
+            background-image: radial-gradient(#d1d1d1 1px, transparent 1px);
+            background-size: 20px 20px;
+            cursor: crosshair;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            touch-action: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Right: Sidebar */
+        .interface-section {
+            width: 380px; /* Fixed width */
+            flex-shrink: 0;
+            background-color: var(--surface);
+            border-left: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            box-sizing: border-box;
+            gap: 20px;
+            height: 100vh;
+            z-index: 10;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.02);
+        }
+
+        .canvas-fab {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--surface-container-high);
+            color: var(--primary);
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            border: none;
+            transition: all 0.2s;
+            z-index: 20;
+        }
+        .canvas-fab:hover { transform: translateX(-50%) scale(1.1); background-color: #e5dff0; }
+        .canvas-fab:active { transform: translateX(-50%) scale(0.95); }
+
+        /* --- Custom Language Dropdown --- */
+        .custom-select-container { position: relative; width: 100%; z-index: 100; }
+        .select-trigger {
+            background-color: var(--surface-container);
+            padding: 14px 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #1C1B1F;
+            transition: 0.2s;
+        }
+        .select-trigger:hover { background-color: #E6E0E9; }
+
+        .select-menu {
+            position: absolute;
+            top: 110%; left: 0; width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            max-height: 400px;
+        }
+        .select-menu.open { display: flex; }
+        .search-box { padding: 12px; border-bottom: 1px solid #eee; background: #fff; display: flex; gap: 8px; align-items: center; }
+        .search-box input { width: 100%; border: none; outline: none; font-size: 14px; }
+        .options-list { overflow-y: auto; flex: 1; }
+        .option { padding: 12px 16px; cursor: pointer; display: flex; flex-direction: column; border-bottom: 1px solid #f5f5f5; }
+        .option:hover { background-color: var(--surface-container); }
+        .option.selected { background-color: var(--primary-container); color: var(--on-primary-container); }
+
+        /* --- New 3-Card Suggestion Layout --- */
+        .suggestions-label { font-size: 12px; font-weight: 500; color: var(--primary); margin-left: 4px; margin-bottom: 6px; display: block; }
+        
+        .suggestion-grid {
+            display: flex;
+            gap: 12px;
+            height: 60px; /* Fixed height so it doesn't shrink */
+            align-items: stretch;
+        }
+
+        .sugg-card {
+            flex: 1; /* All take equal width initially */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            position: relative;
+            background-color: var(--surface-container);
+            color: #1C1B1F;
+            border: 1px solid transparent;
+        }
+
+        .sugg-card:hover { transform: translateY(-2px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .sugg-card:active { transform: translateY(0); }
+
+        /* Center Card (Top 1) Styling */
+        .sugg-card.center-card {
+            flex: 1.4; /* Slightly wider */
+            background-color: var(--primary-container);
+            color: var(--on-primary-container);
+            font-weight: 700;
+            font-size: 20px;
+            border: 1px solid var(--primary);
+            z-index: 2; /* Visual pop */
+        }
+        
+        /* Side Cards (2 and 3) */
+        .sugg-card.side-card {
+            font-size: 16px;
+            color: #49454F;
+            background-color: #F7F2FA;
+            border: 1px solid #CAC4D0;
+        }
+
+        /* Empty State style */
+        .sugg-card.empty {
+            color: #CCC;
+            pointer-events: none; /* Not clickable */
+            font-style: italic;
+        }
+
+
+        /* Text Area */
+        .text-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
+        textarea {
+            width: 100%; height: 100%;
+            border: 1px solid var(--outline);
+            border-radius: 12px; padding: 16px;
+            font-size: 20px; font-family: inherit;
+            resize: none; box-sizing: border-box;
+            outline: none; background: transparent;
+        }
+        textarea:focus { border-color: var(--primary); border-width: 2px; padding: 15px; }
+
+        /* Buttons */
+        .action-buttons { display: flex; gap: 12px; margin-top: auto; }
+        .btn {
+            flex: 1; height: 52px; border-radius: 26px;
+            font-size: 15px; font-weight: 500;
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; cursor: pointer; border: none; transition: 0.1s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-outline { background: transparent; border: 1px solid var(--outline); color: #49454F; }
+        .btn-filled { background-color: var(--primary); color: white; box-shadow: 0 4px 10px rgba(103, 80, 164, 0.2); }
+
+        /* Loader */
+        .loading-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: transparent; z-index: 50; pointer-events: none;
+        }
+        .loading-line.active { background: #EADDFF; }
+        .loading-line.active::after {
+            content: ''; position: absolute; left: -50%; height: 100%; width: 50%;
+            background: #6750A4; animation: load 1s linear infinite;
+        }
+        @keyframes load { 0% {left: -50%; width: 30%} 50% {width: 50%} 100% {left: 100%; width: 30%} }
+
+        /* Mobile */
+        @media (max-width: 800px) {
+            body { flex-direction: column; }
+            .ink-section { flex: 1; border-bottom: 1px solid #e0e0e0; }
+            .interface-section { width: 100%; height: 55vh; flex-shrink: 1; border-left: none; }
+            .canvas-fab { bottom: 16px; left: auto; right: 16px; transform: none; }
+            .canvas-fab:hover { transform: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Left: Canvas -->
+    <div class="ink-section" id="canvasContainer">
+        <div id="loader" class="loading-line"></div>
+        <canvas id="inkCanvas"></canvas>
+        <button class="canvas-fab" onclick="clearCanvas(false)" title="Clear Ink">
+            <span class="material-symbols-outlined">ink_eraser</span>
+        </button>
+    </div>
+
+    <!-- Right: Sidebar -->
+    <div class="interface-section">
+        
+        <!-- Language -->
+        <div>
+            <span class="suggestions-label">INPUT LANGUAGE</span>
+            <div class="custom-select-container">
+                <div class="select-trigger" onclick="toggleDropdown(event)">
+                    <span id="selectedLangName">Hindi (हिन्दी)</span>
+                    <span class="material-symbols-outlined">expand_more</span>
+                </div>
+                <div class="select-menu" id="langMenu">
+                    <div class="search-box">
+                        <span class="material-symbols-outlined" style="color:#666">search</span>
+                        <input type="text" id="langSearch" placeholder="Search..." oninput="filterLanguages()">
+                    </div>
+                    <div class="options-list" id="langList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fixed 3-Card Suggestions -->
+        <div>
+            <span class="suggestions-label">SUGGESTIONS</span>
+            
+            <div class="suggestion-grid">
+                <!-- Left Card: Shows 3rd Result -->
+                <div id="card-left" class="sugg-card side-card empty" onclick="pickSuggestion(2)">---</div>
+                
+                <!-- Center Card: Shows 1st Result (Highlight) -->
+                <div id="card-center" class="sugg-card center-card empty" onclick="pickSuggestion(0)">---</div>
+                
+                <!-- Right Card: Shows 2nd Result -->
+                <div id="card-right" class="sugg-card side-card empty" onclick="pickSuggestion(1)">---</div>
+            </div>
+        </div>
+
+        <!-- Output -->
+        <div class="text-wrapper">
+            <textarea id="resultText" placeholder="Result..."></textarea>
+        </div>
+
+        <!-- Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-outline" onclick="clearTextField()">
+                <span class="material-symbols-outlined">backspace</span> Clear
+            </button>
+            <button class="btn btn-filled" id="copyBtn" onclick="copyText()">
+                <span class="material-symbols-outlined">content_copy</span> Copy
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const languages = [
+            { code: 'hi-t-i0-handwrit', name: 'Hindi', native: 'हिन्दी' },
+            { code: 'en-t-i0-handwrit', name: 'English', native: 'English' },
+            { code: 'el-t-i0-handwrit', name: 'Greek', native: 'Ελληνικά' },
+            { code: 'bn-t-i0-handwrit', name: 'Bengali', native: 'বাংলা' },
+            { code: 'mr-t-i0-handwrit', name: 'Marathi', native: 'मराठी' },
+            { code: 'gu-t-i0-handwrit', name: 'Gujarati', native: 'ગુજરાતી' },
+            { code: 'ta-t-i0-handwrit', name: 'Tamil', native: 'தமிழ்' },
+            { code: 'te-t-i0-handwrit', name: 'Telugu', native: 'తెలుగు' },
+            { code: 'kn-t-i0-handwrit', name: 'Kannada', native: 'ಕನ್ನಡ' },
+            { code: 'ml-t-i0-handwrit', name: 'Malayalam', native: 'മലയാളം' },
+            { code: 'pa-t-i0-handwrit', name: 'Punjabi', native: 'ਪੰਜਾਬੀ' },
+            { code: 'ur-t-i0-handwrit', name: 'Urdu', native: 'اردو' },
+            { code: 'ne-t-i0-handwrit', name: 'Nepali', native: 'नेपाली' },
+            { code: 'zh-t-i0-handwrit', name: 'Chinese', native: '中文' },
+            { code: 'ja-t-i0-handwrit', name: 'Japanese', native: '日本語' },
+            { code: 'ru-t-i0-handwrit', name: 'Russian', native: 'Русский' },
+            { code: 'ar-t-i0-handwrit', name: 'Arabic', native: 'العربية' },
+            { code: 'es-t-i0-handwrit', name: 'Spanish', native: 'Español' },
+            { code: 'fr-t-i0-handwrit', name: 'French', native: 'Français' },
+            { code: 'de-t-i0-handwrit', name: 'German', native: 'Deutsch' },
+            { code: 'it-t-i0-handwrit', name: 'Italian', native: 'Italiano' },
+            { code: 'pt-t-i0-handwrit', name: 'Portuguese', native: 'Português' },
+        ];
+
+        let currentLang = 'hi-t-i0-handwrit';
+        // Store current suggestions [Top1, Top2, Top3]
+        let currentSuggestions = [null, null, null]; 
+
+        // Elements
+        const canvas = document.getElementById('inkCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvasContainer');
+        const resultText = document.getElementById('resultText');
+        const loader = document.getElementById('loader');
+        const copyBtn = document.getElementById('copyBtn');
+        const langMenu = document.getElementById('langMenu');
+        const langList = document.getElementById('langList');
+        const selectedLangName = document.getElementById('selectedLangName');
+
+        // Card Elements
+        const cardLeft = document.getElementById('card-left');   // 3rd
+        const cardCenter = document.getElementById('card-center'); // 1st
+        const cardRight = document.getElementById('card-right');  // 2nd
+
+        // Resize
+        function resizeCanvas() {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#1C1B1F';
+            ctx.lineWidth = 4;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 50);
+
+        // Language Logic
+        function initLanguages() { renderLangList(languages); }
+        function renderLangList(list) {
+            langList.innerHTML = '';
+            list.forEach(lang => {
+                const div = document.createElement('div');
+                div.className = `option ${lang.code === currentLang ? 'selected' : ''}`;
+                div.innerHTML = `<span>${lang.name}</span><small>${lang.native}</small>`;
+                div.onclick = () => selectLanguage(lang);
+                langList.appendChild(div);
+            });
+        }
+        function toggleDropdown(e) {
+            e.stopPropagation(); langMenu.classList.toggle('open');
+            if(langMenu.classList.contains('open')) document.getElementById('langSearch').focus();
+        }
+        function filterLanguages() {
+            const term = document.getElementById('langSearch').value.toLowerCase();
+            renderLangList(languages.filter(l => l.name.toLowerCase().includes(term) || l.native.toLowerCase().includes(term)));
+        }
+        function selectLanguage(lang) {
+            currentLang = lang.code;
+            selectedLangName.innerText = `${lang.name} (${lang.native})`;
+            langMenu.classList.remove('open');
+            clearCanvas(false);
+            renderLangList(languages); 
+        }
+        document.addEventListener('click', (e) => { if (!e.target.closest('.custom-select-container')) langMenu.classList.remove('open'); });
+        initLanguages();
+
+        // Drawing Logic
+        let isDrawing = false;
+        let allStrokes = [], currentStrokeX = [], currentStrokeY = [], currentStrokeT = [], startTime = 0;
+
+        const getPos = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        };
+
+        const start = (e) => {
+            isDrawing = true;
+            const { x, y } = getPos(e);
+            currentStrokeX = [Math.round(x)]; currentStrokeY = [Math.round(y)]; currentStrokeT = [0];
+            startTime = Date.now();
+            ctx.beginPath(); ctx.moveTo(x, y);
+        };
+        const move = (e) => {
+            if (!isDrawing) return;
+            const { x, y } = getPos(e);
+            ctx.lineTo(x, y); ctx.stroke();
+            currentStrokeX.push(Math.round(x)); currentStrokeY.push(Math.round(y)); currentStrokeT.push(Date.now() - startTime);
+        };
+        const end = () => {
+            if (!isDrawing) return;
+            isDrawing = false;
+            if (currentStrokeX.length > 0) {
+                allStrokes.push([currentStrokeX, currentStrokeY, currentStrokeT]);
+                triggerRecognition();
+            }
+        };
+
+        canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move);
+        canvas.addEventListener('mouseup', end); canvas.addEventListener('mouseout', end);
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); start(e); });
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); move(e); });
+        canvas.addEventListener('touchend', (e) => { e.preventDefault(); end(); });
+
+        // Functions
+        function clearCanvas(clearText) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            allStrokes = [];
+            resetCards(); // Reset cards to empty state
+            if(clearText) resultText.value = "";
+        }
+
+        function resetCards() {
+            currentSuggestions = [null, null, null];
+            
+            cardCenter.innerText = "---";
+            cardCenter.classList.add('empty');
+            
+            cardRight.innerText = "---";
+            cardRight.classList.add('empty');
+            
+            cardLeft.innerText = "---";
+            cardLeft.classList.add('empty');
+        }
+
+        function clearTextField() { resultText.value = ""; resultText.focus(); }
+
+        function copyText() {
+            if(!resultText.value) return;
+            navigator.clipboard.writeText(resultText.value).then(() => {
+                const orig = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<span class="material-symbols-outlined">check</span> Copied';
+                copyBtn.style.backgroundColor = '#2e7d32';
+                setTimeout(() => { copyBtn.innerHTML = orig; copyBtn.style.backgroundColor = ''; }, 2000);
+            });
+        }
+
+        // --- Logic: Pick Suggestion ---
+        function pickSuggestion(index) {
+            const word = currentSuggestions[index];
+            if (!word) return;
+
+            const current = resultText.value;
+            const needsSpace = current.length > 0 && current.slice(-1) !== ' ' && current.slice(-1) !== '\n';
+            resultText.value = current + (needsSpace ? ' ' : '') + word + ' ';
+            
+            // Auto clear
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            allStrokes = [];
+            resetCards();
+            resultText.scrollTop = resultText.scrollHeight;
+        }
+
+        // --- API ---
+        async function triggerRecognition() {
+            if (allStrokes.length === 0) return;
+            loader.classList.add('active');
+
+            try {
+                const url = `https://inputtools.google.com/request?itc=${currentLang}&app=translate`;
+                const body = {
+                    "app_version": 0.4, "api_level": "537.36", "device": "5.0", "input_type": 0, "options": "enable_pre_space",
+                    "requests": [{
+                        "writing_guide": { "writing_area_width": canvas.width, "writing_area_height": canvas.height },
+                        "pre_context": "", 
+                        "max_num_results": 3, // Request exactly 3 results
+                        "max_completions": 0,
+                        "language": currentLang.substring(0, 2),
+                        "ink": allStrokes
+                    }]
+                };
+
+                const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                const data = await response.json();
+
+                if (data[0] === "SUCCESS") {
+                    const words = data[1][0][1];
+                    
+                    // Assign results to variables
+                    const top1 = words[0] || "";
+                    const top2 = words[1] || "";
+                    const top3 = words[2] || "";
+
+                    // Save to global array for click handler
+                    currentSuggestions = [top1, top2, top3];
+
+                    // --- UPDATE UI CARDS ---
+                    
+                    // Center (Top 1)
+                    cardCenter.innerText = top1;
+                    if(top1) cardCenter.classList.remove('empty');
+
+                    // Right (Top 2)
+                    cardRight.innerText = top2 || "";
+                    if(top2) { cardRight.classList.remove('empty'); } else { cardRight.classList.add('empty'); }
+
+                    // Left (Top 3)
+                    cardLeft.innerText = top3 || "";
+                    if(top3) { cardLeft.classList.remove('empty'); } else { cardLeft.classList.add('empty'); }
+                }
+            } catch (e) { console.error(e); } 
+            finally { loader.classList.remove('active'); }
+        }
+    </script>
+</body>
+</html>
