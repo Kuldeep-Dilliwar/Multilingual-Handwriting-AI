@@ -6,8 +6,7 @@ A beautiful, full-screen web application that converts handwriting into digital 
 
 ## 🚀 Live Demo
 
-<!-- REPLACE THE LINK BELOW WITH YOUR GITHUB PAGES LINK ONCE HOSTED -->
-[**Click here to use the App**](https://your-username.github.io/repo-name/)
+[**Click here to use the App**](https://Kuldeep-Dilliwar.github.io/Multilingual-Handwriting-AI/)
 
 ## ✨ Features
 
@@ -42,7 +41,7 @@ This project is built as a **Single Page Application (SPA)** with zero dependenc
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/your-username/your-repo-name.git
+    git clone github.com:Kuldeep-Dilliwar/Multilingual-Handwriting-AI.git
     ```
 2.  Navigate to the folder.
 3.  Double-click `index.html` to open it in your browser.
