@@ -1,25 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pro Handwriting AI - Fixed Suggestions</title>
-    
-    <!-- Fonts & Icons -->
+    <title>Pro Handwriting AI - Material Split</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
     <style>
         :root {
+            /* Material 3 Color Tokens */
             --primary: #6750A4;
             --on-primary: #FFFFFF;
             --primary-container: #EADDFF;
             --on-primary-container: #21005D;
+
+            --secondary-container: #E8DEF8;
+            --on-secondary-container: #1D192B;
+
             --surface: #FFFBFE;
             --surface-container: #F3EDF7;
             --surface-container-high: #ECE6F0;
+
+            --error-container: #FFDAD6;
+            --on-error-container: #410002;
+
             --outline: #79747E;
         }
 
@@ -35,12 +45,9 @@
             display: flex;
         }
 
-        /* --- Layout --- */
-        
-        /* Left: Canvas */
+        /* --- Left: Canvas --- */
         .ink-section {
-            flex: 1; 
-            min-width: 0;
+            flex: 1;
             position: relative;
             background-color: #fff;
             background-image: radial-gradient(#d1d1d1 1px, transparent 1px);
@@ -56,22 +63,14 @@
             touch-action: none;
             width: 100%;
             height: 100%;
-        }
 
-        /* Right: Sidebar */
-        .interface-section {
-            width: 380px; /* Fixed width */
-            flex-shrink: 0;
-            background-color: var(--surface);
-            border-left: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            padding: 24px;
-            box-sizing: border-box;
-            gap: 20px;
-            height: 100vh;
-            z-index: 10;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.02);
+            /* --- ADD THESE LINES --- */
+            cursor: crosshair;
+            /* Forces the crosshair cursor */
+            user-select: none;
+            /* Stops text highlighting */
+            -webkit-user-select: none;
+            /* For Safari/Chrome compatibility */
         }
 
         .canvas-fab {
@@ -88,223 +87,558 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
             border: none;
             transition: all 0.2s;
             z-index: 20;
         }
-        .canvas-fab:hover { transform: translateX(-50%) scale(1.1); background-color: #e5dff0; }
-        .canvas-fab:active { transform: translateX(-50%) scale(0.95); }
 
-        /* --- Custom Language Dropdown --- */
-        .custom-select-container { position: relative; width: 100%; z-index: 100; }
+        .canvas-fab:hover {
+            transform: translateX(-50%) scale(1.1);
+            background-color: #e5dff0;
+        }
+
+        .canvas-fab:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        /* --- Right: Sidebar --- */
+        .interface-section {
+            width: 380px;
+            flex-shrink: 0;
+            background-color: var(--surface);
+            border-left: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            box-sizing: border-box;
+            gap: 16px;
+            height: 100vh;
+            z-index: 10;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Top Bar */
+        .top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .lang-wrapper {
+            flex: 1;
+        }
+
+        /* Material Switch */
+        .mode-toggle-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 32px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #E7E0EC;
+            transition: .4s;
+            border-radius: 34px;
+            border: 2px solid #79747E;
+            box-sizing: border-box;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 6px;
+            bottom: 6px;
+            background-color: #79747E;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+            background-color: #ffffff;
+            height: 24px;
+            width: 24px;
+            bottom: 2px;
+            left: 4px;
+        }
+
+        .toggle-label {
+            font-size: 10px;
+            font-weight: 700;
+            margin-top: 4px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Suggestions Cards */
+        .suggestions-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--primary);
+            margin-left: 4px;
+            margin-bottom: 6px;
+            display: block;
+            letter-spacing: 0.5px;
+        }
+
+        .suggestion-grid {
+            display: flex;
+            gap: 12px;
+            height: 56px;
+            align-items: stretch;
+            margin-bottom: 10px;
+        }
+
+        .sugg-card {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            background-color: var(--surface-container);
+            color: #1C1B1F;
+        }
+
+        .sugg-card:hover {
+            background-color: #E6E0E9;
+        }
+
+        .sugg-card.center-card {
+            flex: 1.4;
+            background-color: var(--primary-container);
+            color: var(--on-primary-container);
+            font-weight: 700;
+            font-size: 18px;
+            border: 1px solid transparent;
+        }
+
+        .sugg-card.empty {
+            color: #CCC;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* --- OUTPUT AREA WRAPPER --- */
+        .output-area {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* MODE 1: TEXTAREA */
+        .paragraph-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100%;
+            border: 1px solid var(--outline);
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 18px;
+            font-family: inherit;
+            line-height: 1.5;
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
+            background: transparent;
+            color: #1C1B1F;
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+            border-width: 2px;
+            padding: 15px;
+        }
+
+        /* MODE 2: SPLIT LIST (Material Style) */
+        .split-list-container {
+            width: 100%;
+            height: 100%;
+            display: none;
+            /* Hidden by default */
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            padding-right: 4px;
+            padding-bottom: 20px;
+        }
+
+        .split-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--surface-container-high);
+            /* Light Grey/Purple */
+            padding: 8px 8px 8px 16px;
+            border-radius: 16px;
+            animation: fadeIn 0.2s ease;
+            transition: background-color 0.2s;
+        }
+
+        .split-row:hover {
+            background-color: #E6E1E5;
+        }
+
+        .split-word-text {
+            font-size: 18px;
+            font-weight: 500;
+            color: #1C1B1F;
+            word-break: break-word;
+            margin-right: 8px;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Action Icon Buttons */
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .icon-btn span {
+            font-size: 20px;
+        }
+
+        /* Copy Button */
+        .btn-copy-word {
+            background-color: var(--secondary-container);
+            color: var(--on-secondary-container);
+        }
+
+        .btn-copy-word:hover {
+            filter: brightness(0.95);
+        }
+
+        .btn-copy-word:active {
+            transform: scale(0.92);
+        }
+
+        /* Delete Button */
+        .btn-delete-word {
+            background-color: transparent;
+            color: #B3261E;
+            /* Material Error Color */
+            border: 1px solid transparent;
+        }
+
+        .btn-delete-word:hover {
+            background-color: var(--error-container);
+            color: var(--on-error-container);
+        }
+
+        .btn-delete-word:active {
+            transform: scale(0.92);
+        }
+
+        /* Bottom Actions */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: auto;
+        }
+
+        .btn {
+            flex: 1;
+            height: 52px;
+            border-radius: 26px;
+            font-size: 15px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--outline);
+            color: #49454F;
+        }
+
+        .btn-filled {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(103, 80, 164, 0.2);
+        }
+
+        /* Language Dropdown Styles */
+        .custom-select-container {
+            position: relative;
+            width: 100%;
+            z-index: 100;
+        }
+
         .select-trigger {
             background-color: var(--surface-container);
-            padding: 14px 16px;
+            padding: 12px 16px;
             border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 500;
             color: #1C1B1F;
-            transition: 0.2s;
         }
-        .select-trigger:hover { background-color: #E6E0E9; }
 
         .select-menu {
             position: absolute;
-            top: 110%; left: 0; width: 100%;
+            top: 110%;
+            left: 0;
+            width: 100%;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             display: none;
             flex-direction: column;
-            overflow: hidden;
+            max-height: 300px;
             border: 1px solid #e0e0e0;
-            max-height: 400px;
+            overflow: hidden;
         }
-        .select-menu.open { display: flex; }
-        .search-box { padding: 12px; border-bottom: 1px solid #eee; background: #fff; display: flex; gap: 8px; align-items: center; }
-        .search-box input { width: 100%; border: none; outline: none; font-size: 14px; }
-        .options-list { overflow-y: auto; flex: 1; }
-        .option { padding: 12px 16px; cursor: pointer; display: flex; flex-direction: column; border-bottom: 1px solid #f5f5f5; }
-        .option:hover { background-color: var(--surface-container); }
-        .option.selected { background-color: var(--primary-container); color: var(--on-primary-container); }
 
-        /* --- New 3-Card Suggestion Layout --- */
-        .suggestions-label { font-size: 12px; font-weight: 500; color: var(--primary); margin-left: 4px; margin-bottom: 6px; display: block; }
-        
-        .suggestion-grid {
+        .select-menu.open {
             display: flex;
-            gap: 12px;
-            height: 60px; /* Fixed height so it doesn't shrink */
-            align-items: stretch;
         }
 
-        .sugg-card {
-            flex: 1; /* All take equal width initially */
+        .search-box {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
             display: flex;
             align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            font-size: 18px;
+            background: #fff;
+        }
+
+        .search-box input {
+            width: 100%;
+            border: none;
+            outline: none;
+            margin-left: 8px;
+            font-size: 14px;
+        }
+
+        .options-list {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .option {
+            padding: 12px 16px;
             cursor: pointer;
-            transition: all 0.2s;
-            user-select: none;
-            position: relative;
+            border-bottom: 1px solid #f5f5f5;
+            transition: 0.1s;
+        }
+
+        .option:hover {
             background-color: var(--surface-container);
-            color: #1C1B1F;
-            border: 1px solid transparent;
         }
 
-        .sugg-card:hover { transform: translateY(-2px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .sugg-card:active { transform: translateY(0); }
+        /* Animation Keyframes */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
 
-        /* Center Card (Top 1) Styling */
-        .sugg-card.center-card {
-            flex: 1.4; /* Slightly wider */
-            background-color: var(--primary-container);
-            color: var(--on-primary-container);
-            font-weight: 700;
-            font-size: 20px;
-            border: 1px solid var(--primary);
-            z-index: 2; /* Visual pop */
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
-        /* Side Cards (2 and 3) */
-        .sugg-card.side-card {
-            font-size: 16px;
-            color: #49454F;
-            background-color: #F7F2FA;
-            border: 1px solid #CAC4D0;
-        }
-
-        /* Empty State style */
-        .sugg-card.empty {
-            color: #CCC;
-            pointer-events: none; /* Not clickable */
-            font-style: italic;
-        }
-
-
-        /* Text Area */
-        .text-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
-        textarea {
-            width: 100%; height: 100%;
-            border: 1px solid var(--outline);
-            border-radius: 12px; padding: 16px;
-            font-size: 20px; font-family: inherit;
-            resize: none; box-sizing: border-box;
-            outline: none; background: transparent;
-        }
-        textarea:focus { border-color: var(--primary); border-width: 2px; padding: 15px; }
-
-        /* Buttons */
-        .action-buttons { display: flex; gap: 12px; margin-top: auto; }
-        .btn {
-            flex: 1; height: 52px; border-radius: 26px;
-            font-size: 15px; font-weight: 500;
-            display: flex; align-items: center; justify-content: center;
-            gap: 8px; cursor: pointer; border: none; transition: 0.1s;
-        }
-        .btn:active { transform: scale(0.98); }
-        .btn-outline { background: transparent; border: 1px solid var(--outline); color: #49454F; }
-        .btn-filled { background-color: var(--primary); color: white; box-shadow: 0 4px 10px rgba(103, 80, 164, 0.2); }
 
         /* Loader */
         .loading-line {
-            position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            background: transparent; z-index: 50; pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            pointer-events: none;
         }
-        .loading-line.active { background: #EADDFF; }
+
+        .loading-line.active {
+            background: #EADDFF;
+        }
+
         .loading-line.active::after {
-            content: ''; position: absolute; left: -50%; height: 100%; width: 50%;
-            background: #6750A4; animation: load 1s linear infinite;
+            content: '';
+            position: absolute;
+            left: -50%;
+            height: 100%;
+            width: 50%;
+            background: #6750A4;
+            animation: load 1s linear infinite;
         }
-        @keyframes load { 0% {left: -50%; width: 30%} 50% {width: 50%} 100% {left: 100%; width: 30%} }
+
+        @keyframes load {
+            0% {
+                left: -50%;
+                width: 30%
+            }
+
+            50% {
+                width: 50%
+            }
+
+            100% {
+                left: 100%;
+                width: 30%
+            }
+        }
 
         /* Mobile */
         @media (max-width: 800px) {
-            body { flex-direction: column; }
-            .ink-section { flex: 1; border-bottom: 1px solid #e0e0e0; }
-            .interface-section { width: 100%; height: 55vh; flex-shrink: 1; border-left: none; }
-            .canvas-fab { bottom: 16px; left: auto; right: 16px; transform: none; }
-            .canvas-fab:hover { transform: none; }
+            body {
+                flex-direction: column;
+            }
+
+            .ink-section {
+                flex: 1;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .interface-section {
+                width: 100%;
+                height: 50vh;
+                border-left: none;
+            }
+
+            .canvas-fab {
+                bottom: 16px;
+                left: auto;
+                right: 16px;
+                transform: none;
+            }
         }
     </style>
 </head>
+
 <body>
 
-    <!-- Left: Canvas -->
     <div class="ink-section" id="canvasContainer">
         <div id="loader" class="loading-line"></div>
         <canvas id="inkCanvas"></canvas>
-        <button class="canvas-fab" onclick="clearCanvas(false)" title="Clear Ink">
+        <button class="canvas-fab" onclick="clearCanvas()" title="Clear Ink">
             <span class="material-symbols-outlined">ink_eraser</span>
         </button>
     </div>
 
-    <!-- Right: Sidebar -->
     <div class="interface-section">
-        
-        <!-- Language -->
-        <div>
-            <span class="suggestions-label">INPUT LANGUAGE</span>
-            <div class="custom-select-container">
-                <div class="select-trigger" onclick="toggleDropdown(event)">
-                    <span id="selectedLangName">Hindi (हिन्दी)</span>
-                    <span class="material-symbols-outlined">expand_more</span>
-                </div>
-                <div class="select-menu" id="langMenu">
-                    <div class="search-box">
-                        <span class="material-symbols-outlined" style="color:#666">search</span>
-                        <input type="text" id="langSearch" placeholder="Search..." oninput="filterLanguages()">
+
+        <div class="top-controls">
+            <div class="lang-wrapper">
+                <span class="suggestions-label">LANGUAGE</span>
+                <div class="custom-select-container">
+                    <div class="select-trigger" onclick="toggleDropdown(event)">
+                        <span id="selectedLangName">Hindi (हिन्दी)</span>
+                        <span class="material-symbols-outlined">expand_more</span>
                     </div>
-                    <div class="options-list" id="langList"></div>
+                    <div class="select-menu" id="langMenu">
+                        <div class="search-box">
+                            <span class="material-symbols-outlined">search</span>
+                            <input type="text" id="langSearch" placeholder="Search..." oninput="filterLanguages()">
+                        </div>
+                        <div class="options-list" id="langList"></div>
+                    </div>
                 </div>
+            </div>
+
+            <div class="mode-toggle-wrapper">
+                <label class="switch">
+                    <input type="checkbox" id="modeToggle" onchange="toggleOutputMode()">
+                    <span class="slider round"></span>
+                </label>
+                <span class="toggle-label" id="modeLabel">SPLIT</span>
             </div>
         </div>
 
-        <!-- Fixed 3-Card Suggestions -->
         <div>
             <span class="suggestions-label">SUGGESTIONS</span>
-            
             <div class="suggestion-grid">
-                <!-- Left Card: Shows 3rd Result -->
                 <div id="card-left" class="sugg-card side-card empty" onclick="pickSuggestion(2)">---</div>
-                
-                <!-- Center Card: Shows 1st Result (Highlight) -->
                 <div id="card-center" class="sugg-card center-card empty" onclick="pickSuggestion(0)">---</div>
-                
-                <!-- Right Card: Shows 2nd Result -->
                 <div id="card-right" class="sugg-card side-card empty" onclick="pickSuggestion(1)">---</div>
             </div>
         </div>
 
-        <!-- Output -->
-        <div class="text-wrapper">
-            <textarea id="resultText" placeholder="Result..."></textarea>
+        <div class="output-area">
+            <span class="suggestions-label">RESULT</span>
+
+            <div class="paragraph-container" id="view-paragraph">
+                <textarea id="resultText" placeholder="Start writing..." oninput="syncSplitView()"></textarea>
+            </div>
+
+            <div class="split-list-container" id="view-split">
+            </div>
         </div>
 
-        <!-- Buttons -->
         <div class="action-buttons">
-            <button class="btn btn-outline" onclick="clearTextField()">
+            <button class="btn btn-outline" onclick="clearText()">
                 <span class="material-symbols-outlined">backspace</span> Clear
             </button>
-            <button class="btn btn-filled" id="copyBtn" onclick="copyText()">
-                <span class="material-symbols-outlined">content_copy</span> Copy
+            <button class="btn btn-filled" id="mainCopyBtn" onclick="copyFullText()">
+                <span class="material-symbols-outlined">content_copy</span> Copy All
             </button>
         </div>
+
     </div>
 
     <script>
-        // Data
+        // Data & Variables
         const languages = [
+            // --- INDIAN LANGUAGES ---
             { code: 'hi-t-i0-handwrit', name: 'Hindi', native: 'हिन्दी' },
-            { code: 'en-t-i0-handwrit', name: 'English', native: 'English' },
-            { code: 'el-t-i0-handwrit', name: 'Greek', native: 'Ελληνικά' },
             { code: 'bn-t-i0-handwrit', name: 'Bengali', native: 'বাংলা' },
             { code: 'mr-t-i0-handwrit', name: 'Marathi', native: 'मराठी' },
             { code: 'gu-t-i0-handwrit', name: 'Gujarati', native: 'ગુજરાતી' },
@@ -314,39 +648,235 @@
             { code: 'ml-t-i0-handwrit', name: 'Malayalam', native: 'മലയാളം' },
             { code: 'pa-t-i0-handwrit', name: 'Punjabi', native: 'ਪੰਜਾਬੀ' },
             { code: 'ur-t-i0-handwrit', name: 'Urdu', native: 'اردو' },
+            { code: 'or-t-i0-handwrit', name: 'Odia', native: 'ଓଡ଼ିଆ' },
+            { code: 'as-t-i0-handwrit', name: 'Assamese', native: 'অসমীয়া' },
+            { code: 'sa-t-i0-handwrit', name: 'Sanskrit', native: 'संस्कृतम्' },
             { code: 'ne-t-i0-handwrit', name: 'Nepali', native: 'नेपाली' },
-            { code: 'zh-t-i0-handwrit', name: 'Chinese', native: '中文' },
-            { code: 'ja-t-i0-handwrit', name: 'Japanese', native: '日本語' },
-            { code: 'ru-t-i0-handwrit', name: 'Russian', native: 'Русский' },
-            { code: 'ar-t-i0-handwrit', name: 'Arabic', native: 'العربية' },
+            { code: 'si-t-i0-handwrit', name: 'Sinhala', native: 'සිංහල' },
+
+            // --- GLOBAL MAJOR ---
+            { code: 'en-t-i0-handwrit', name: 'English', native: 'English' },
             { code: 'es-t-i0-handwrit', name: 'Spanish', native: 'Español' },
             { code: 'fr-t-i0-handwrit', name: 'French', native: 'Français' },
             { code: 'de-t-i0-handwrit', name: 'German', native: 'Deutsch' },
             { code: 'it-t-i0-handwrit', name: 'Italian', native: 'Italiano' },
             { code: 'pt-t-i0-handwrit', name: 'Portuguese', native: 'Português' },
-        ];
+            { code: 'ru-t-i0-handwrit', name: 'Russian', native: 'Русский' },
+            { code: 'ar-t-i0-handwrit', name: 'Arabic', native: 'العربية' },
+            { code: 'zh-t-i0-handwrit', name: 'Chinese (Simplified)', native: '简体中文' },
+            { code: 'zh-hant-t-i0-handwrit', name: 'Chinese (Traditional)', native: '繁體中文' },
+            { code: 'ja-t-i0-handwrit', name: 'Japanese', native: '日本語' },
+            { code: 'ko-t-i0-handwrit', name: 'Korean', native: '한국어' },
 
+            // --- EUROPEAN ---
+            { code: 'sq-t-i0-handwrit', name: 'Albanian', native: 'Shqip' },
+            { code: 'eu-t-i0-handwrit', name: 'Basque', native: 'Euskara' },
+            { code: 'be-t-i0-handwrit', name: 'Belarusian', native: 'Беларуская' },
+            { code: 'bs-t-i0-handwrit', name: 'Bosnian', native: 'Bosanski' },
+            { code: 'bg-t-i0-handwrit', name: 'Bulgarian', native: 'Български' },
+            { code: 'ca-t-i0-handwrit', name: 'Catalan', native: 'Català' },
+            { code: 'hr-t-i0-handwrit', name: 'Croatian', native: 'Hrvatski' },
+            { code: 'cs-t-i0-handwrit', name: 'Czech', native: 'Čeština' },
+            { code: 'da-t-i0-handwrit', name: 'Danish', native: 'Dansk' },
+            { code: 'nl-t-i0-handwrit', name: 'Dutch', native: 'Nederlands' },
+            { code: 'et-t-i0-handwrit', name: 'Estonian', native: 'Eesti' },
+            { code: 'fi-t-i0-handwrit', name: 'Finnish', native: 'Suomi' },
+            { code: 'gl-t-i0-handwrit', name: 'Galician', native: 'Galego' },
+            { code: 'el-t-i0-handwrit', name: 'Greek', native: 'Ελληνικά' },
+            { code: 'hu-t-i0-handwrit', name: 'Hungarian', native: 'Magyar' },
+            { code: 'is-t-i0-handwrit', name: 'Icelandic', native: 'Íslenska' },
+            { code: 'ga-t-i0-handwrit', name: 'Irish', native: 'Gaeilge' },
+            { code: 'lv-t-i0-handwrit', name: 'Latvian', native: 'Latviešu' },
+            { code: 'lt-t-i0-handwrit', name: 'Lithuanian', native: 'Lietuvių' },
+            { code: 'mk-t-i0-handwrit', name: 'Macedonian', native: 'Македонски' },
+            { code: 'mt-t-i0-handwrit', name: 'Maltese', native: 'Malti' },
+            { code: 'no-t-i0-handwrit', name: 'Norwegian', native: 'Norsk' },
+            { code: 'pl-t-i0-handwrit', name: 'Polish', native: 'Polski' },
+            { code: 'ro-t-i0-handwrit', name: 'Romanian', native: 'Română' },
+            { code: 'sr-t-i0-handwrit', name: 'Serbian', native: 'Српски' },
+            { code: 'sk-t-i0-handwrit', name: 'Slovak', native: 'Slovenčina' },
+            { code: 'sl-t-i0-handwrit', name: 'Slovenian', native: 'Slovenščina' },
+            { code: 'sv-t-i0-handwrit', name: 'Swedish', native: 'Svenska' },
+            { code: 'uk-t-i0-handwrit', name: 'Ukrainian', native: 'Українська' },
+            { code: 'cy-t-i0-handwrit', name: 'Welsh', native: 'Cymraeg' },
+
+            // --- ASIAN & PACIFIC ---
+            { code: 'yue-hant-t-i0-handwrit', name: 'Cantonese', native: '廣東話' },
+            { code: 'ceb-t-i0-handwrit', name: 'Cebuano', native: 'Cebuano' },
+            { code: 'tl-t-i0-handwrit', name: 'Filipino', native: 'Filipino' },
+            { code: 'hmn-t-i0-handwrit', name: 'Hmong', native: 'Hmoob' },
+            { code: 'id-t-i0-handwrit', name: 'Indonesian', native: 'Indonesia' },
+            { code: 'jv-t-i0-handwrit', name: 'Javanese', native: 'Basa Jawa' },
+            { code: 'km-t-i0-handwrit', name: 'Khmer', native: 'ខ្មែរ' },
+            { code: 'lo-t-i0-handwrit', name: 'Lao', native: 'ລາວ' },
+            { code: 'ms-t-i0-handwrit', name: 'Malay', native: 'Melayu' },
+            { code: 'mn-t-i0-handwrit', name: 'Mongolian', native: 'Монгол' },
+            { code: 'my-t-i0-handwrit', name: 'Myanmar (Burmese)', native: 'မြန်မာ' },
+            { code: 'th-t-i0-handwrit', name: 'Thai', native: 'ไทย' },
+            { code: 'vi-t-i0-handwrit', name: 'Vietnamese', native: 'Tiếng Việt' },
+
+            // --- MIDDLE EAST & CENTRAL ASIA ---
+            { code: 'hy-t-i0-handwrit', name: 'Armenian', native: 'Հայերեն' },
+            { code: 'az-t-i0-handwrit', name: 'Azerbaijani', native: 'Azərbaycan' },
+            { code: 'ka-t-i0-handwrit', name: 'Georgian', native: 'ქართული' },
+            { code: 'he-t-i0-handwrit', name: 'Hebrew', native: 'עברית' },
+            { code: 'kk-t-i0-handwrit', name: 'Kazakh', native: 'Қазақ тілі' },
+            { code: 'ky-t-i0-handwrit', name: 'Kyrgyz', native: 'Кыргызча' },
+            { code: 'fa-t-i0-handwrit', name: 'Persian', native: 'فارسی' },
+            { code: 'tg-t-i0-handwrit', name: 'Tajik', native: 'Тоҷикӣ' },
+            { code: 'tr-t-i0-handwrit', name: 'Turkish', native: 'Türkçe' },
+            { code: 'uz-t-i0-handwrit', name: 'Uzbek', native: 'Oʻzbek' },
+
+            // --- AFRICAN ---
+            { code: 'af-t-i0-handwrit', name: 'Afrikaans', native: 'Afrikaans' },
+            { code: 'am-t-i0-handwrit', name: 'Amharic', native: 'አማርኛ' },
+            { code: 'ha-t-i0-handwrit', name: 'Hausa', native: 'Hausa' },
+            { code: 'ig-t-i0-handwrit', name: 'Igbo', native: 'Igbo' },
+            { code: 'mg-t-i0-handwrit', name: 'Malagasy', native: 'Malagasy' },
+            { code: 'ny-t-i0-handwrit', name: 'Nyanja', native: 'Chinyanja' },
+            { code: 'so-t-i0-handwrit', name: 'Somali', native: 'Soomaaliga' },
+            { code: 'sw-t-i0-handwrit', name: 'Swahili', native: 'Kiswahili' },
+            { code: 'xh-t-i0-handwrit', name: 'Xhosa', native: 'isiXhosa' },
+            { code: 'zu-t-i0-handwrit', name: 'Zulu', native: 'isiZulu' },
+
+            // --- OTHER ---
+            { code: 'eo-t-i0-handwrit', name: 'Esperanto', native: 'Esperanto' },
+            { code: 'ht-t-i0-handwrit', name: 'Haitian Creole', native: 'Kreyòl Ayisyen' },
+            { code: 'mi-t-i0-handwrit', name: 'Maori', native: 'Māori' }
+        ];
         let currentLang = 'hi-t-i0-handwrit';
-        // Store current suggestions [Top1, Top2, Top3]
-        let currentSuggestions = [null, null, null]; 
+        let currentSuggestions = ["", "", ""];
 
         // Elements
         const canvas = document.getElementById('inkCanvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvasContainer');
         const resultText = document.getElementById('resultText');
-        const loader = document.getElementById('loader');
-        const copyBtn = document.getElementById('copyBtn');
-        const langMenu = document.getElementById('langMenu');
-        const langList = document.getElementById('langList');
-        const selectedLangName = document.getElementById('selectedLangName');
+        const viewParagraph = document.getElementById('view-paragraph');
+        const viewSplit = document.getElementById('view-split');
+        const modeToggle = document.getElementById('modeToggle');
+        const modeLabel = document.getElementById('modeLabel');
+        const mainCopyBtn = document.getElementById('mainCopyBtn');
 
-        // Card Elements
-        const cardLeft = document.getElementById('card-left');   // 3rd
-        const cardCenter = document.getElementById('card-center'); // 1st
-        const cardRight = document.getElementById('card-right');  // 2nd
+        // Cards
+        const cardLeft = document.getElementById('card-left');
+        const cardCenter = document.getElementById('card-center');
+        const cardRight = document.getElementById('card-right');
 
-        // Resize
+        // --- 1. View Toggle Logic ---
+        function toggleOutputMode() {
+            if (modeToggle.checked) {
+                // Switch to SPLIT MODE
+                modeLabel.innerText = "SPLIT";
+                viewParagraph.style.display = "none";
+                viewSplit.style.display = "flex";
+                mainCopyBtn.style.display = "none";
+                syncSplitView(); // Generate the list
+            } else {
+                // Switch to PARAGRAPH MODE
+                modeLabel.innerText = "SPLIT";
+                viewParagraph.style.display = "flex";
+                viewSplit.style.display = "none";
+                mainCopyBtn.style.display = "flex";
+            }
+        }
+
+        function syncSplitView() {
+            const text = resultText.value;
+            viewSplit.innerHTML = ""; // Clear list
+
+            if (!text.trim()) return;
+
+            // Split by whitespace to get words array
+            let words = text.trim().split(/\s+/);
+
+            words.forEach((word, index) => {
+                if (!word) return;
+
+                // Create Row
+                const row = document.createElement('div');
+                row.className = 'split-row';
+
+                // Word Text
+                const span = document.createElement('span');
+                span.className = 'split-word-text';
+                span.innerText = word;
+
+                // Actions Container
+                const actions = document.createElement('div');
+                actions.className = 'row-actions';
+
+                // Copy Button (Light Purple)
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'icon-btn btn-copy-word';
+                copyBtn.innerHTML = '<span class="material-symbols-outlined">content_copy</span>';
+                copyBtn.onclick = () => copySingleWord(word, copyBtn);
+
+                // CUT/DELETE Button (Red Tint)
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'icon-btn btn-delete-word';
+                deleteBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
+                deleteBtn.onclick = () => cutWordAtIndex(index);
+
+                actions.appendChild(copyBtn);
+                actions.appendChild(deleteBtn);
+
+                row.appendChild(span);
+                row.appendChild(actions);
+                viewSplit.appendChild(row);
+            });
+
+            // Auto scroll to bottom
+            viewSplit.scrollTop = viewSplit.scrollHeight;
+        }
+
+        // --- 2. Action Logic ---
+
+        // Remove a specific word by its index
+        function cutWordAtIndex(indexToRemove) {
+            let words = resultText.value.trim().split(/\s+/);
+
+            // Remove element at index
+            words.splice(indexToRemove, 1);
+
+            // Rejoin and update textarea
+            resultText.value = words.join(" ") + " ";
+
+            // Refresh list
+            syncSplitView();
+        }
+
+        function copySingleWord(word, btn) {
+            navigator.clipboard.writeText(word).then(() => {
+                const icon = btn.querySelector('span');
+                icon.innerText = 'check';
+                const originalColor = btn.style.backgroundColor;
+                btn.style.backgroundColor = '#B8F397'; // Success Green (Light)
+
+                setTimeout(() => {
+                    icon.innerText = 'content_copy';
+                    btn.style.backgroundColor = '';
+                }, 1000);
+            });
+        }
+
+        function copyFullText() {
+            if (!resultText.value) return;
+            navigator.clipboard.writeText(resultText.value).then(() => {
+                const orig = mainCopyBtn.innerHTML;
+                mainCopyBtn.innerHTML = '<span class="material-symbols-outlined">check</span> Copied';
+                mainCopyBtn.style.backgroundColor = '#2e7d32'; // Dark Green for filled button
+                setTimeout(() => { mainCopyBtn.innerHTML = orig; mainCopyBtn.style.backgroundColor = ''; }, 2000);
+            });
+        }
+
+        function clearText() {
+            resultText.value = "";
+            syncSplitView();
+            resultText.focus();
+        }
+
+        // --- 3. Drawing & Core Logic ---
         function resizeCanvas() {
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
@@ -358,37 +888,6 @@
         window.addEventListener('resize', resizeCanvas);
         setTimeout(resizeCanvas, 50);
 
-        // Language Logic
-        function initLanguages() { renderLangList(languages); }
-        function renderLangList(list) {
-            langList.innerHTML = '';
-            list.forEach(lang => {
-                const div = document.createElement('div');
-                div.className = `option ${lang.code === currentLang ? 'selected' : ''}`;
-                div.innerHTML = `<span>${lang.name}</span><small>${lang.native}</small>`;
-                div.onclick = () => selectLanguage(lang);
-                langList.appendChild(div);
-            });
-        }
-        function toggleDropdown(e) {
-            e.stopPropagation(); langMenu.classList.toggle('open');
-            if(langMenu.classList.contains('open')) document.getElementById('langSearch').focus();
-        }
-        function filterLanguages() {
-            const term = document.getElementById('langSearch').value.toLowerCase();
-            renderLangList(languages.filter(l => l.name.toLowerCase().includes(term) || l.native.toLowerCase().includes(term)));
-        }
-        function selectLanguage(lang) {
-            currentLang = lang.code;
-            selectedLangName.innerText = `${lang.name} (${lang.native})`;
-            langMenu.classList.remove('open');
-            clearCanvas(false);
-            renderLangList(languages); 
-        }
-        document.addEventListener('click', (e) => { if (!e.target.closest('.custom-select-container')) langMenu.classList.remove('open'); });
-        initLanguages();
-
-        // Drawing Logic
         let isDrawing = false;
         let allStrokes = [], currentStrokeX = [], currentStrokeY = [], currentStrokeT = [], startTime = 0;
 
@@ -398,19 +897,27 @@
             const clientY = e.clientY || e.touches[0].clientY;
             return { x: clientX - rect.left, y: clientY - rect.top };
         };
-
         const start = (e) => {
+            e.preventDefault(); // <--- THIS IS THE IMPORTANT FIX
             isDrawing = true;
             const { x, y } = getPos(e);
-            currentStrokeX = [Math.round(x)]; currentStrokeY = [Math.round(y)]; currentStrokeT = [0];
+            currentStrokeX = [Math.round(x)];
+            currentStrokeY = [Math.round(y)];
+            currentStrokeT = [0];
             startTime = Date.now();
-            ctx.beginPath(); ctx.moveTo(x, y);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
         };
+
         const move = (e) => {
             if (!isDrawing) return;
+            e.preventDefault(); // <--- ALSO ADD HERE
             const { x, y } = getPos(e);
-            ctx.lineTo(x, y); ctx.stroke();
-            currentStrokeX.push(Math.round(x)); currentStrokeY.push(Math.round(y)); currentStrokeT.push(Date.now() - startTime);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            currentStrokeX.push(Math.round(x));
+            currentStrokeY.push(Math.round(y));
+            currentStrokeT.push(Date.now() - startTime);
         };
         const end = () => {
             if (!isDrawing) return;
@@ -427,40 +934,18 @@
         canvas.addEventListener('touchmove', (e) => { e.preventDefault(); move(e); });
         canvas.addEventListener('touchend', (e) => { e.preventDefault(); end(); });
 
-        // Functions
-        function clearCanvas(clearText) {
+        function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             allStrokes = [];
-            resetCards(); // Reset cards to empty state
-            if(clearText) resultText.value = "";
+            resetSuggestions();
+        }
+        function resetSuggestions() {
+            currentSuggestions = ["", "", ""];
+            cardCenter.innerText = "---"; cardCenter.classList.add('empty');
+            cardRight.innerText = "---"; cardRight.classList.add('empty');
+            cardLeft.innerText = "---"; cardLeft.classList.add('empty');
         }
 
-        function resetCards() {
-            currentSuggestions = [null, null, null];
-            
-            cardCenter.innerText = "---";
-            cardCenter.classList.add('empty');
-            
-            cardRight.innerText = "---";
-            cardRight.classList.add('empty');
-            
-            cardLeft.innerText = "---";
-            cardLeft.classList.add('empty');
-        }
-
-        function clearTextField() { resultText.value = ""; resultText.focus(); }
-
-        function copyText() {
-            if(!resultText.value) return;
-            navigator.clipboard.writeText(resultText.value).then(() => {
-                const orig = copyBtn.innerHTML;
-                copyBtn.innerHTML = '<span class="material-symbols-outlined">check</span> Copied';
-                copyBtn.style.backgroundColor = '#2e7d32';
-                setTimeout(() => { copyBtn.innerHTML = orig; copyBtn.style.backgroundColor = ''; }, 2000);
-            });
-        }
-
-        // --- Logic: Pick Suggestion ---
         function pickSuggestion(index) {
             const word = currentSuggestions[index];
             if (!word) return;
@@ -468,18 +953,16 @@
             const current = resultText.value;
             const needsSpace = current.length > 0 && current.slice(-1) !== ' ' && current.slice(-1) !== '\n';
             resultText.value = current + (needsSpace ? ' ' : '') + word + ' ';
-            
-            // Auto clear
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            allStrokes = [];
-            resetCards();
+
+            if (modeToggle.checked) syncSplitView();
+
+            clearCanvas();
             resultText.scrollTop = resultText.scrollHeight;
         }
 
-        // --- API ---
         async function triggerRecognition() {
             if (allStrokes.length === 0) return;
-            loader.classList.add('active');
+            document.getElementById('loader').classList.add('active');
 
             try {
                 const url = `https://inputtools.google.com/request?itc=${currentLang}&app=translate`;
@@ -487,11 +970,8 @@
                     "app_version": 0.4, "api_level": "537.36", "device": "5.0", "input_type": 0, "options": "enable_pre_space",
                     "requests": [{
                         "writing_guide": { "writing_area_width": canvas.width, "writing_area_height": canvas.height },
-                        "pre_context": "", 
-                        "max_num_results": 3, // Request exactly 3 results
-                        "max_completions": 0,
-                        "language": currentLang.substring(0, 2),
-                        "ink": allStrokes
+                        "pre_context": "", "max_num_results": 3, "max_completions": 0,
+                        "language": currentLang.substring(0, 2), "ink": allStrokes
                     }]
                 };
 
@@ -500,32 +980,49 @@
 
                 if (data[0] === "SUCCESS") {
                     const words = data[1][0][1];
-                    
-                    // Assign results to variables
-                    const top1 = words[0] || "";
-                    const top2 = words[1] || "";
-                    const top3 = words[2] || "";
+                    currentSuggestions = [words[0] || "", words[1] || "", words[2] || ""];
 
-                    // Save to global array for click handler
-                    currentSuggestions = [top1, top2, top3];
+                    cardCenter.innerText = currentSuggestions[0];
+                    if (currentSuggestions[0]) cardCenter.classList.remove('empty');
 
-                    // --- UPDATE UI CARDS ---
-                    
-                    // Center (Top 1)
-                    cardCenter.innerText = top1;
-                    if(top1) cardCenter.classList.remove('empty');
+                    cardRight.innerText = currentSuggestions[1] || "";
+                    if (currentSuggestions[1]) cardRight.classList.remove('empty'); else cardRight.classList.add('empty');
 
-                    // Right (Top 2)
-                    cardRight.innerText = top2 || "";
-                    if(top2) { cardRight.classList.remove('empty'); } else { cardRight.classList.add('empty'); }
-
-                    // Left (Top 3)
-                    cardLeft.innerText = top3 || "";
-                    if(top3) { cardLeft.classList.remove('empty'); } else { cardLeft.classList.add('empty'); }
+                    cardLeft.innerText = currentSuggestions[2] || "";
+                    if (currentSuggestions[2]) cardLeft.classList.remove('empty'); else cardLeft.classList.add('empty');
                 }
-            } catch (e) { console.error(e); } 
-            finally { loader.classList.remove('active'); }
+            } catch (e) { console.error(e); }
+            finally { document.getElementById('loader').classList.remove('active'); }
         }
+
+        // Language Logic
+        const langMenu = document.getElementById('langMenu');
+        const langList = document.getElementById('langList');
+        function initLanguages() { renderLangList(languages); }
+        function renderLangList(list) {
+            langList.innerHTML = '';
+            list.forEach(lang => {
+                const div = document.createElement('div');
+                div.className = `option ${lang.code === currentLang ? 'selected' : ''}`;
+                div.innerHTML = `<span>${lang.name}</span>`;
+                div.onclick = () => {
+                    currentLang = lang.code;
+                    document.getElementById('selectedLangName').innerText = `${lang.name} (${lang.native})`;
+                    langMenu.classList.remove('open');
+                    clearCanvas();
+                    renderLangList(languages);
+                };
+                langList.appendChild(div);
+            });
+        }
+        function toggleDropdown(e) { e.stopPropagation(); langMenu.classList.toggle('open'); }
+        function filterLanguages() {
+            const term = document.getElementById('langSearch').value.toLowerCase();
+            renderLangList(languages.filter(l => l.name.toLowerCase().includes(term)));
+        }
+        document.addEventListener('click', (e) => { if (!e.target.closest('.custom-select-container')) langMenu.classList.remove('open'); });
+        initLanguages();
     </script>
 </body>
+
 </html>
