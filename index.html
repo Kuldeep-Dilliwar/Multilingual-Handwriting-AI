@@ -1004,7 +1004,7 @@
             list.forEach(lang => {
                 const div = document.createElement('div');
                 div.className = `option ${lang.code === currentLang ? 'selected' : ''}`;
-                div.innerHTML = `<span>${lang.name}</span>`;
+                div.innerHTML = `<span>${lang.name} (${lang.native})</span>`;
                 div.onclick = () => {
                     currentLang = lang.code;
                     document.getElementById('selectedLangName').innerText = `${lang.name} (${lang.native})`;
