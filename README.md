@@ -24,7 +24,7 @@ A beautiful, full-screen web application that converts handwriting into digital 
 
 ## 🌍 Supported Languages
 
-Supports over 20 languages, including but not limited to:
+Supports over 20+ languages, including but not limited to:
 *   Hindi (हिन्दी)
 *   English
 *   Greek (Ελληνικά)
@@ -34,6 +34,7 @@ Supports over 20 languages, including but not limited to:
 *   Arabic (العربية)
 *   Spanish, French, German, Italian, Portuguese
 *   Bengali, Marathi, Tamil, Telugu, Kannada, Malayalam, Punjabi, Urdu, Nepali
+*   and many more.
 
 ## 🛠️ How to Run Locally
 
