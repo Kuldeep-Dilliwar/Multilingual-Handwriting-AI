@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,8 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
     <style>
         :root {
@@ -31,6 +29,10 @@
             --on-error-container: #410002;
 
             --outline: #79747E;
+        }
+
+        * {
+            box-sizing: border-box; /* Global box-sizing for better layout control */
         }
 
         body {
@@ -56,6 +58,8 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            /* Ensure canvas doesn't shrink to 0 on mobile resize */
+            min-height: 200px; 
         }
 
         canvas {
@@ -63,18 +67,13 @@
             touch-action: none;
             width: 100%;
             height: 100%;
-
-            /* --- ADD THESE LINES --- */
             cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%236750A4' stroke='white' stroke-width='1.5'><path d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'/></svg>") 3 21, crosshair;  
-            /* Forces the crosshair cursor */
             user-select: none;
-            /* Stops text highlighting */
             -webkit-user-select: none;
-            /* For Safari/Chrome compatibility */
         }
 
         canvas.drawing-active {
-            cursor: none; /* Hides cursor while drawing */
+            cursor: none;
         }
 
         .canvas-fab {
@@ -106,7 +105,7 @@
             transform: translateX(-50%) scale(0.95);
         }
 
-        /* --- Right: Sidebar --- */
+        /* --- Right: Sidebar (Desktop Default) --- */
         .interface-section {
             width: 380px;
             flex-shrink: 0;
@@ -115,11 +114,11 @@
             display: flex;
             flex-direction: column;
             padding: 24px;
-            box-sizing: border-box;
             gap: 16px;
             height: 100vh;
             z-index: 10;
             box-shadow: -2px 0 10px rgba(0, 0, 0, 0.02);
+            transition: height 0.3s ease;
         }
 
         /* Top Bar */
@@ -262,6 +261,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            min-height: 0; /* Crucial for nested flex scrolling */
         }
 
         /* MODE 1: TEXTAREA */
@@ -298,8 +298,7 @@
         .split-list-container {
             width: 100%;
             height: 100%;
-            display: none;
-            /* Hidden by default */
+            display: none; /* Hidden by default */
             flex-direction: column;
             gap: 8px;
             overflow-y: auto;
@@ -312,11 +311,11 @@
             align-items: center;
             justify-content: space-between;
             background-color: var(--surface-container-high);
-            /* Light Grey/Purple */
             padding: 8px 8px 8px 16px;
             border-radius: 16px;
             animation: fadeIn 0.2s ease;
             transition: background-color 0.2s;
+            flex-shrink: 0; /* Don't squash rows */
         }
 
         .split-row:hover {
@@ -371,7 +370,6 @@
         .btn-delete-word {
             background-color: transparent;
             color: #B3261E;
-            /* Material Error Color */
             border: 1px solid transparent;
         }
 
@@ -389,6 +387,7 @@
             display: flex;
             gap: 12px;
             margin-top: auto;
+            padding-top: 10px; /* spacing from output */
         }
 
         .btn {
@@ -490,15 +489,8 @@
 
         /* Animation Keyframes */
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Loader */
@@ -526,44 +518,63 @@
         }
 
         @keyframes load {
-            0% {
-                left: -50%;
-                width: 30%
-            }
-
-            50% {
-                width: 50%
-            }
-
-            100% {
-                left: 100%;
-                width: 30%
-            }
+            0% { left: -50%; width: 30% }
+            50% { width: 50% }
+            100% { left: 100%; width: 30% }
         }
 
-        /* Mobile */
+        /* --- RESPONSIVE CSS FIXES --- */
+
+        /* Mobile / Tablet Responsiveness */
         @media (max-width: 800px) {
             body {
-                flex-direction: column;
+                flex-direction: column; /* Stack vertically */
             }
 
             .ink-section {
-                flex: 1;
+                flex: 1; 
+                height: auto; 
+                /* Ensures canvas is always usable, even if content below is large */
+                min-height: 40vh; 
                 border-bottom: 1px solid #e0e0e0;
             }
 
             .interface-section {
                 width: 100%;
-                height: 50vh;
+                /* Restrict height on mobile so canvas stays visible */
+                height: 55vh; 
+                max-height: 600px;
                 border-left: none;
+                padding: 16px;
+                border-top-left-radius: 24px;
+                border-top-right-radius: 24px;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
             }
 
+            /* Adjust FAB position for mobile */
             .canvas-fab {
-                bottom: 16px;
+                bottom: 20px;
                 left: auto;
-                right: 16px;
+                right: 20px;
                 transform: none;
             }
+            
+            /* Remove hover transform on touch to prevent sticky states */
+            .canvas-fab:hover {
+                transform: none;
+                background-color: var(--surface-container-high);
+            }
+            .canvas-fab:active {
+                background-color: #e5dff0;
+            }
+        }
+
+        /* Touch Device Optimizations */
+        @media (hover: none) {
+            .sugg-card:hover { background-color: var(--surface-container); }
+            .split-row:hover { background-color: var(--surface-container-high); }
+            .sugg-card:active { background-color: #d0bcff; transform: scale(0.98); }
+            .btn:active { transform: scale(0.98); }
         }
     </style>
 </head>
@@ -671,7 +682,7 @@
             { code: 'zh-hant-t-i0-handwrit', name: 'Chinese (Traditional)', native: '繁體中文' },
             { code: 'ja-t-i0-handwrit', name: 'Japanese', native: '日本語' },
             { code: 'ko-t-i0-handwrit', name: 'Korean', native: '한국어' },
-
+            
             // --- EUROPEAN ---
             { code: 'sq-t-i0-handwrit', name: 'Albanian', native: 'Shqip' },
             { code: 'eu-t-i0-handwrit', name: 'Basque', native: 'Euskara' },
@@ -730,7 +741,7 @@
             { code: 'tg-t-i0-handwrit', name: 'Tajik', native: 'Тоҷикӣ' },
             { code: 'tr-t-i0-handwrit', name: 'Turkish', native: 'Türkçe' },
             { code: 'uz-t-i0-handwrit', name: 'Uzbek', native: 'Oʻzbek' },
-
+            
             // --- AFRICAN ---
             { code: 'af-t-i0-handwrit', name: 'Afrikaans', native: 'Afrikaans' },
             { code: 'am-t-i0-handwrit', name: 'Amharic', native: 'አማርኛ' },
@@ -839,13 +850,13 @@
         // Remove a specific word by its index
         function cutWordAtIndex(indexToRemove) {
             let words = resultText.value.trim().split(/\s+/);
-
+            
             // Remove element at index
             words.splice(indexToRemove, 1);
-
+            
             // Rejoin and update textarea
             resultText.value = words.join(" ") + " ";
-
+            
             // Refresh list
             syncSplitView();
         }
@@ -880,20 +891,47 @@
             resultText.focus();
         }
 
-        // --- 3. Drawing & Core Logic ---
+        // --- 3. Drawing & Core Logic (UPDATED FOR RESPONSIVENESS) ---
+        
+        let isDrawing = false;
+        // Stroke data storage: [xPoints, yPoints, tPoints]
+        let allStrokes = []; 
+        let currentStrokeX = [], currentStrokeY = [], currentStrokeT = [], startTime = 0;
+
         function resizeCanvas() {
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
+            
+            // Reset styles after resize
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.strokeStyle = '#1C1B1F';
             ctx.lineWidth = 4;
+            
+            // Redraw existing strokes so they don't disappear
+            redrawStrokes();
         }
+        
+        function redrawStrokes() {
+            if (allStrokes.length === 0) return;
+            
+            allStrokes.forEach(stroke => {
+                const x = stroke[0];
+                const y = stroke[1];
+                
+                if (x.length > 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(x[0], y[0]);
+                    for (let i = 1; i < x.length; i++) {
+                        ctx.lineTo(x[i], y[i]);
+                    }
+                    ctx.stroke();
+                }
+            });
+        }
+
         window.addEventListener('resize', resizeCanvas);
         setTimeout(resizeCanvas, 50);
-
-        let isDrawing = false;
-        let allStrokes = [], currentStrokeX = [], currentStrokeY = [], currentStrokeT = [], startTime = 0;
 
         const getPos = (e) => {
             const rect = canvas.getBoundingClientRect();
@@ -902,7 +940,7 @@
             return { x: clientX - rect.left, y: clientY - rect.top };
         };
         const start = (e) => {
-            e.preventDefault(); // <--- THIS IS THE IMPORTANT FIX
+            e.preventDefault(); 
             isDrawing = true;
             const { x, y } = getPos(e);
             currentStrokeX = [Math.round(x)];
@@ -915,7 +953,7 @@
 
         const move = (e) => {
             if (!isDrawing) return;
-            e.preventDefault(); // <--- ALSO ADD HERE
+            e.preventDefault(); 
             const { x, y } = getPos(e);
             ctx.lineTo(x, y);
             ctx.stroke();
@@ -934,8 +972,8 @@
 
         canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move);
         canvas.addEventListener('mouseup', end); canvas.addEventListener('mouseout', end);
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); start(e); });
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); move(e); });
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); start(e); }, {passive: false});
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); move(e); }, {passive: false});
         canvas.addEventListener('touchend', (e) => { e.preventDefault(); end(); });
 
         function clearCanvas() {
@@ -1028,5 +1066,4 @@
         initLanguages();
     </script>
 </body>
-
 </html>
